@@ -46,6 +46,7 @@ io.onConnection(channel => {
   })
 })
 
-// Serverni 9208-portda ishga tushirish
-console.log("Multiplayer server 9208-portda ishga tushmoqda...")
-io.listen(9208)
+// Render uchun dinamik port yoki 9208 (lokal uchun)
+const port = process.env.PORT || 3000
+io.listen(port)
+console.log(`Multiplayer server ${port}-portda ishga tushdi...`)
