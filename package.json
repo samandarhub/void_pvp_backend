@@ -1,0 +1,16 @@
+{
+  "name": "void-pvp-backend",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "@geckos.io/server": "^3.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.12.2"
+  }
+}
