@@ -1,8 +1,18 @@
 import http from 'http'
 import geckos from '@geckos.io/server'
 
-// Render uchun oddiy HTTP server yaratish
+// Render uchun oddiy HTTP server yaratish (CORS bilan)
 const server = http.createServer((req, res) => {
+  console.log(`Kelgan so'rov: ${req.method} ${req.url}`);
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Request-Method', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'OPTIONS, GET');
+  res.setHeader('Access-Control-Allow-Headers', '*');
+  if (req.method === 'OPTIONS') {
+    res.writeHead(200);
+    res.end();
+    return;
+  }
   res.writeHead(200)
   res.end('Server is running')
 })
