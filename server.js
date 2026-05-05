@@ -1,7 +1,15 @@
+import http from 'http'
 import geckos from '@geckos.io/server'
 
-// Geckos.io serverini yaratish
+// Render uchun oddiy HTTP server yaratish
+const server = http.createServer((req, res) => {
+  res.writeHead(200)
+  res.end('Server is running')
+})
+
+// Geckos.io serverini ushbu HTTP serverga bog'lash
 const io = geckos()
+io.addServer(server)
 
 // O'yinchilar ma'lumotlarini saqlash uchun obyekt
 let players = {}
@@ -46,7 +54,8 @@ io.onConnection(channel => {
   })
 })
 
-// Render uchun dinamik port yoki 9208 (lokal uchun)
+// Serverni ishga tushirish
 const port = process.env.PORT || 3000
-io.listen(port)
-console.log(`Multiplayer server ${port}-portda ishga tushdi...`)
+server.listen(port, () => {
+  console.log(`Multiplayer server ${port}-portda ishga tushdi...`)
+})
