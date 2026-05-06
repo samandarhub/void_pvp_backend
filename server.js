@@ -21,10 +21,7 @@ const server = http.createServer((req, res) => {
 // server.js ichida
 const io = geckos({
   cors: {
-    origin: (origin, callback) => {
-      // Har qanday originni qabul qilish (Xavfsizlik uchun keyinchalik cheklash mumkin)
-      callback(null, true)
-    },
+    origin: 'https://void-pvp.pages.dev', // Aniq manzilni ko'rsatamiz
     allowAuthorization: true
   }
 });
