@@ -17,8 +17,13 @@ const server = http.createServer((req, res) => {
   res.end('Server is running')
 })
 
-// Geckos.io serverini ushbu HTTP serverga bog'lash
-const io = geckos()
+// Geckos.io serverini CORS sozlamalari bilan yaratish
+const io = geckos({
+  cors: { 
+    origin: '*', 
+    allowAuthorization: true 
+  }
+})
 io.addServer(server)
 
 // O'yinchilar ma'lumotlarini saqlash uchun obyekt
@@ -64,8 +69,8 @@ io.onConnection(channel => {
   })
 })
 
-// Serverni ishga tushirish
-const port = process.env.PORT || 3000
+// Serverni ishga tushirish (9208-port Nginx orqali SSL uchun)
+const port = process.env.PORT || 9208
 server.listen(port, () => {
   console.log(`Multiplayer server ${port}-portda ishga tushdi...`)
 })
