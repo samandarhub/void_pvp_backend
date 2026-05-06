@@ -18,12 +18,13 @@ const server = http.createServer((req, res) => {
 })
 
 // Geckos.io serverini CORS sozlamalari bilan yaratish
+// server.js ichida
 const io = geckos({
-  cors: { 
-    origin: '*', 
-    allowAuthorization: true 
+  cors: {
+    origin: "https://void-pvp.pages.dev", // Aniq manzilni ko'rsating
+    allowAuthorization: true
   }
-})
+});
 io.addServer(server)
 
 // O'yinchilar ma'lumotlarini saqlash uchun obyekt
