@@ -74,8 +74,8 @@ io.onConnection(channel => {
 })
 
 // Serverni ishga tushirish (Nginx orqali proxy qilish uchun 3000-port tavsiya etiladi)
-const port = process.env.PORT || 3000
-server.listen(port, () => {
-  console.log(`Multiplayer server ${port}-portda ishga tushdi...`)
-  console.log(`Agar Nginx 9208-portda bo'lsa, u 127.0.0.1:${port} ga proxy qilishi kerak.`)
-})
+// server.js oxiri
+const port = 3001; // Portni aniq 3001 qiling
+server.listen(port, '0.0.0.0', () => {
+  console.log(`Multiplayer server ${port}-portda ishga tushdi...`);
+});
