@@ -21,7 +21,10 @@ const server = http.createServer((req, res) => {
 // server.js ichida
 const io = geckos({
   cors: {
-    origin: "https://void-pvp.pages.dev", // Aniq manzilni ko'rsating
+    origin: (origin, callback) => {
+      // Har qanday originni qabul qilish (Xavfsizlik uchun keyinchalik cheklash mumkin)
+      callback(null, true)
+    },
     allowAuthorization: true
   }
 });
@@ -70,8 +73,9 @@ io.onConnection(channel => {
   })
 })
 
-// Serverni ishga tushirish (9208-port Nginx orqali SSL uchun)
-const port = process.env.PORT || 9208
+// Serverni ishga tushirish (Nginx orqali proxy qilish uchun 3000-port tavsiya etiladi)
+const port = process.env.PORT || 3000
 server.listen(port, () => {
   console.log(`Multiplayer server ${port}-portda ishga tushdi...`)
+  console.log(`Agar Nginx 9208-portda bo'lsa, u 127.0.0.1:${port} ga proxy qilishi kerak.`)
 })
