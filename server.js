@@ -77,8 +77,8 @@ io.onConnection(channel => {
       weaponIdx: data.weaponIdx ?? 0
     };
 
-    // Faqat bir xil matchdagi o'yinchilarga yuborish (ixtiyoriy, hozircha hamma ko'raversin)
-    io.emit('stateUpdate', players);
+    // O'zimizdan tashqari barcha o'yinchilarga holatni yuborish
+    channel.broadcast.emit('stateUpdate', players);
   });
 
   channel.on('shoot', data => {
