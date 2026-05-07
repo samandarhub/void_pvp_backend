@@ -16,7 +16,7 @@ const io = geckos({
     { urls: 'stun:stun1.l.google.com:19302' }
   ],
   cors: {
-    origin: 'https://void-pvp.pages.dev',
+    origin: '*',
     allowAuthorization: true
   },
   portRange: {
@@ -40,7 +40,7 @@ io.onConnection(channel => {
   channel.on('findMatch', () => {
     console.log("Match qidirilmoqda:", channel.id);
     if (matchmakingQueue.includes(channel.id)) return;
-    
+
     // Agar allaqachon o'yinda bo'lsa chiqib ketsin
     if (matches[channel.id]) {
       const oldMatchId = matches[channel.id];
@@ -65,7 +65,7 @@ io.onConnection(channel => {
 
       if (channels[p1Id]) channels[p1Id].emit('matchFound', { opponentId: p2Id });
       if (channels[p2Id]) channels[p2Id].emit('matchFound', { opponentId: p1Id });
-      
+
       console.log("Match topildi!", p1Id, "vs", p2Id);
     }
   });
@@ -76,7 +76,7 @@ io.onConnection(channel => {
       rotation: data.rotation,
       weaponIdx: data.weaponIdx ?? 0
     };
-    
+
     // Faqat bir xil matchdagi o'yinchilarga yuborish (ixtiyoriy, hozircha hamma ko'raversin)
     io.emit('stateUpdate', players);
   });
@@ -133,10 +133,10 @@ io.onConnection(channel => {
     console.log("O'yinchi chiqib ketdi:", channel.id);
     delete players[channel.id];
     delete channels[channel.id];
-    
+
     // Matchmaking navbatidan o'chirish
     matchmakingQueue = matchmakingQueue.filter(id => id !== channel.id);
-    
+
     // Agar matchda bo'lsa, matchni tugatish
     const matchId = matches[channel.id];
     if (matchId && matchData[matchId]) {
