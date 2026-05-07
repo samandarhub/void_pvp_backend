@@ -28,45 +28,69 @@ const io = geckos({
 io.addServer(server);
 
 let players = {};
-let matchmakingQueue = [];
+let matchmakingQueues = {
+  '1v1': [],
+  '2v2': [],
+  '4v4': []
+};
 let matches = {}; // playerId -> matchId
-let matchData = {}; // matchId -> { players: [id1, id2], scores: { id1: 0, id2: 0 } }
+let matchData = {}; // matchId -> { mode: string, players: [id1, id2...], scores: { id: 0... } }
 let channels = {}; // id -> channel
 
 io.onConnection(channel => {
   console.log("Yangi o'yinchi ulandi! ID:", channel.id);
   channels[channel.id] = channel;
 
-  channel.on('findMatch', () => {
-    console.log("Match qidirilmoqda:", channel.id);
-    if (matchmakingQueue.includes(channel.id)) return;
+  channel.on('findMatch', (data) => {
+    const mode = data?.mode || '1v1';
+    console.log(`Match qidirilmoqda: ${channel.id} (Mode: ${mode})`);
+    
+    // Tozalash
+    Object.keys(matchmakingQueues).forEach(m => {
+      matchmakingQueues[m] = matchmakingQueues[m].filter(id => id !== channel.id);
+    });
 
-    // Agar allaqachon o'yinda bo'lsa chiqib ketsin
     if (matches[channel.id]) {
       const oldMatchId = matches[channel.id];
       delete matchData[oldMatchId];
       delete matches[channel.id];
     }
 
-    matchmakingQueue.push(channel.id);
+    matchmakingQueues[mode].push(channel.id);
 
-    if (matchmakingQueue.length >= 2) {
-      const p1Id = matchmakingQueue.shift();
-      const p2Id = matchmakingQueue.shift();
+    // Kerakli o'yinchilar sonini aniqlash
+    const requiredPlayers = parseInt(mode.split('v')[0]) * 2;
+
+    if (matchmakingQueues[mode].length >= requiredPlayers) {
+      const matchPlayers = [];
+      for (let i = 0; i < requiredPlayers; i++) {
+        matchPlayers.push(matchmakingQueues[mode].shift());
+      }
+
       const matchId = `match_${Date.now()}`;
+      const scores = {};
+      matchPlayers.forEach(id => scores[id] = 0);
 
       matchData[matchId] = {
-        players: [p1Id, p2Id],
-        scores: { [p1Id]: 0, [p2Id]: 0 }
+        mode,
+        players: matchPlayers,
+        scores
       };
 
-      matches[p1Id] = matchId;
-      matches[p2Id] = matchId;
-
-      if (channels[p1Id]) channels[p1Id].emit('matchFound', { opponentId: p2Id });
-      if (channels[p2Id]) channels[p2Id].emit('matchFound', { opponentId: p1Id });
-
-      console.log("Match topildi!", p1Id, "vs", p2Id);
+      matchPlayers.forEach(id => {
+        matches[id] = matchId;
+        const opponentIds = matchPlayers.filter(pid => pid !== id);
+        
+        if (channels[id]) {
+          channels[id].emit('matchFound', { 
+            mode,
+            opponentIds,
+            team: matchPlayers.indexOf(id) < requiredPlayers / 2 ? 'A' : 'B'
+          });
+        }
+      });
+      
+      console.log(`Match topildi! Mode: ${mode}, Players: ${matchPlayers.join(', ')}`);
     }
   });
 
@@ -135,7 +159,9 @@ io.onConnection(channel => {
     delete channels[channel.id];
 
     // Matchmaking navbatidan o'chirish
-    matchmakingQueue = matchmakingQueue.filter(id => id !== channel.id);
+    Object.keys(matchmakingQueues).forEach(m => {
+      matchmakingQueues[m] = matchmakingQueues[m].filter(id => id !== channel.id);
+    });
 
     // Agar matchda bo'lsa, matchni tugatish
     const matchId = matches[channel.id];
