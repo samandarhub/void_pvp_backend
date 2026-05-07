@@ -91,7 +91,36 @@ io.onConnection(channel => {
       });
       
       console.log(`Match topildi! Mode: ${mode}, Players: ${matchPlayers.join(', ')}`);
+    } else {
+      // Agar match topilmasa, navbatdagi barchaga yangilanish yuborish
+      matchmakingQueues[mode].forEach(id => {
+        if (channels[id]) {
+          channels[id].emit('queueUpdate', {
+            current: matchmakingQueues[mode].length,
+            required: requiredPlayers
+          });
+        }
+      });
     }
+  });
+
+  channel.on('cancelMatch', () => {
+    console.log("Match qidirish bekor qilindi:", channel.id);
+    Object.keys(matchmakingQueues).forEach(mode => {
+      if (matchmakingQueues[mode].includes(channel.id)) {
+        matchmakingQueues[mode] = matchmakingQueues[mode].filter(id => id !== channel.id);
+        const requiredPlayers = parseInt(mode.split('v')[0]) * 2;
+        // Qolganlarga yangilanish yuborish
+        matchmakingQueues[mode].forEach(id => {
+          if (channels[id]) {
+            channels[id].emit('queueUpdate', {
+              current: matchmakingQueues[mode].length,
+              required: requiredPlayers
+            });
+          }
+        });
+      }
+    });
   });
 
   channel.on('move', data => {
