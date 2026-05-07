@@ -41,6 +41,7 @@ io.onConnection(channel => {
     console.log("Match qidirilmoqda:", channel.id);
     if (matchmakingQueue.includes(channel.id)) return;
     
+    // Agar allaqachon o'yinda bo'lsa chiqib ketsin
     if (matches[channel.id]) {
       const oldMatchId = matches[channel.id];
       delete matchData[oldMatchId];
@@ -75,6 +76,8 @@ io.onConnection(channel => {
       rotation: data.rotation,
       weaponIdx: data.weaponIdx ?? 0
     };
+    
+    // Faqat bir xil matchdagi o'yinchilarga yuborish (ixtiyoriy, hozircha hamma ko'raversin)
     io.emit('stateUpdate', players);
   });
 
@@ -86,6 +89,18 @@ io.onConnection(channel => {
   });
 
   channel.on('playerHit', data => {
+    const matchId = matches[data.targetId];
+    if (!matchId || !matchData[matchId]) {
+      // Agar matchda bo'lmasa ham damage ketaversin (test uchun)
+      io.emit('damage', {
+        targetId: data.targetId,
+        damage: data.damage,
+        attackerId: channel.id
+      });
+      return;
+    }
+
+    // Damage yuborish
     io.emit('damage', {
       targetId: data.targetId,
       damage: data.damage,
@@ -106,6 +121,7 @@ io.onConnection(channel => {
 
       if (scores[attackerId] >= 10) {
         io.emit('gameOver', { winnerId: attackerId });
+        // Matchni tugatish
         const playersInMatch = matchData[matchId].players;
         playersInMatch.forEach(pid => delete matches[pid]);
         delete matchData[matchId];
@@ -118,8 +134,10 @@ io.onConnection(channel => {
     delete players[channel.id];
     delete channels[channel.id];
     
+    // Matchmaking navbatidan o'chirish
     matchmakingQueue = matchmakingQueue.filter(id => id !== channel.id);
     
+    // Agar matchda bo'lsa, matchni tugatish
     const matchId = matches[channel.id];
     if (matchId && matchData[matchId]) {
       const opponentId = matchData[matchId].players.find(id => id !== channel.id);
@@ -138,3 +156,4 @@ const port = 3001;
 server.listen(port, '0.0.0.0', () => {
   console.log('Multiplayer server 3001-portda ishga tushdi...');
 });
+
