@@ -16,7 +16,7 @@ const io = geckos({
     { urls: 'stun:stun1.l.google.com:19302' }
   ],
   cors: {
-    origin: '*',
+    origin: 'https://void-pvp.pages.dev',
     allowAuthorization: true
   },
   portRange: {
