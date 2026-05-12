@@ -127,7 +127,8 @@ io.onConnection(channel => {
     players[channel.id] = {
       position: data.position,
       rotation: data.rotation,
-      weaponIdx: data.weaponIdx ?? 0
+      weaponIdx: data.weaponIdx ?? 0,
+      action: data.action || 'idle'
     };
 
     // O'zimizdan tashqari barcha o'yinchilarga holatni yuborish
